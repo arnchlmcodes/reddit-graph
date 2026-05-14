@@ -1,16 +1,16 @@
-# Python
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/
+
+# Python (legacy)
 __pycache__/
 *.py[cod]
 *.egg-info/
 dist/
 build/
 .eggs/
-*.egg
-
-# Virtual environments
-.venv/
-venv/
-env/
 
 # IDE / editor
 .vscode/
@@ -22,5 +22,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# Generated output
+# Generated output (legacy Python)
 *_graph.html
+
+.vercel

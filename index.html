@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reddit Profile Graph — Visualize Any User's Activity</title>
+  <meta name="description" content="Interactive network graph that maps any Reddit user's public activity — posts, comments, and subreddit participation — into a beautiful, explorable visualization.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- vis.js Network -->
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ─── Landing Screen ─────────────────────────────────────────── -->
+  <div id="landing" class="landing">
+    <div class="landing-bg"></div>
+    <div class="landing-card">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="#FF4500" stroke-width="3" fill="none" opacity="0.3"/>
+          <circle cx="24" cy="24" r="14" stroke="#FF4500" stroke-width="2" fill="none" opacity="0.5"/>
+          <circle cx="24" cy="24" r="6" fill="#FF4500"/>
+          <line x1="24" y1="2" x2="24" y2="10" stroke="#FF4500" stroke-width="2" opacity="0.4"/>
+          <line x1="24" y1="38" x2="24" y2="46" stroke="#FF4500" stroke-width="2" opacity="0.4"/>
+          <line x1="2" y1="24" x2="10" y2="24" stroke="#FF4500" stroke-width="2" opacity="0.4"/>
+          <line x1="38" y1="24" x2="46" y2="24" stroke="#FF4500" stroke-width="2" opacity="0.4"/>
+        </svg>
+      </div>
+      <h1>Reddit Profile Graph</h1>
+      <p class="subtitle">Visualize any user's activity as an interactive network</p>
+
+      <form id="usernameForm" class="input-group">
+        <div class="input-wrapper">
+          <span class="input-prefix">u/</span>
+          <input
+            type="text"
+            id="usernameInput"
+            placeholder="Enter username"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          >
+        </div>
+        <button type="submit" id="submitBtn">
+          <span class="btn-text">Visualize</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+
+      <div id="errorMsg" class="error-msg" hidden></div>
+    </div>
+
+    <div class="landing-footer">
+      <span>No login required</span>
+      <span class="dot">·</span>
+      <span>100% client-side</span>
+      <span class="dot">·</span>
+      <span>Open source</span>
+    </div>
+  </div>
+
+  <!-- ─── Loading Overlay ────────────────────────────────────────── -->
+  <div id="loading" class="loading" hidden>
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p class="loading-title">Fetching activity</p>
+      <p id="loadingStatus" class="loading-status">Starting...</p>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Graph Screen ───────────────────────────────────────────── -->
+  <div id="graphScreen" class="graph-screen" hidden>
+    <!-- vis.js renders here -->
+    <div id="graphContainer" class="graph-container"></div>
+
+    <!-- Stats bar -->
+    <div id="statsBar" class="stats-bar">
+      <span id="statUser" class="stat"></span>
+      <span class="stat-sep">|</span>
+      <span id="statItems" class="stat"></span>
+      <span class="stat-sep">|</span>
+      <span id="statSubs" class="stat"></span>
+      <span class="stat-sep">|</span>
+      <span id="statCats" class="stat"></span>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-title">Legend</div>
+      <div class="legend-item"><span class="legend-icon" style="color:#FF4500;font-size:18px;">★</span> User</div>
+      <div class="legend-item"><span class="legend-icon legend-diamond" style="color:#7E57C2;">◆</span> Category</div>
+      <div class="legend-item"><span class="legend-icon" style="color:#4FC3F7;">●</span> Subreddit</div>
+      <div class="legend-item"><span class="legend-icon" style="color:#69F0AE;">■</span> Post</div>
+      <div class="legend-item"><span class="legend-icon" style="color:#FFD54F;">●</span> Comment</div>
+      <div class="legend-item"><span class="legend-icon" style="color:#FF5252;">●</span> Controversial</div>
+      <div class="legend-hint">Click node → open on Reddit<br>Scroll to zoom · Drag to pan</div>
+    </div>
+
+    <!-- Back button -->
+    <button id="backBtn" class="back-btn" title="New search">
+      ← New Search
+    </button>
+  </div>
+
+  <!-- App script -->
+  <script src="js/bundle.js"></script>
+</body>
+</html>

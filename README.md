@@ -1,114 +1,98 @@
-#  Reddit Profile Graph Visualizer
+# Reddit Profile Graph Visualizer
 
-An interactive network graph that maps any Reddit user's public activity (posts, comments, and subreddit participation) into a beautiful, explorable visualization you can open in your browser.
+An interactive network graph that maps any Reddit user's public activity (posts, comments, and subreddit participation) into a beautiful, explorable visualization — right in your browser.
+
+**100% client-side.** No backend scraping. No API. No login required. Just pure static HTML you can open directly in your browser.
 
 ---
 
-##  Features
+## Features
 
-- **Interactive Graph** — Zoom, pan, drag nodes, and click to open any post/comment on Reddit.
-- **Grouped Categories** — Subreddits are auto-classified into topic categories (Gaming, Tech, News, etc.) and clustered as diamond nodes in the graph.
-- **Smart Layout** — Force-directed physics (ForceAtlas2) keeps related nodes clustered naturally.
-- **Rich Tooltips** — Hover over any node to see full details: score, date, flair, body preview, and direct links.
+- **Interactive Graph** — Zoom, pan, drag nodes, and click to open any post/comment on Reddit
+- **Grouped Categories** — Subreddits are auto-classified into topic categories (Gaming, Tech, News, etc.) shown as diamond nodes
+- **Smart Layout** — Force-directed physics settles into a readable layout, then lets you freely rearrange
+- **Rich Tooltips** — Hover any node to see full details: score, date, flair, body preview, and direct links
 - **Visual Encoding**
-  - Node **size** scales logarithmically with score.
-  - Node **colour** encodes type (post / comment / controversial).
-  - **Category diamonds** are colour-coded by topic (16 distinct colours).
-  - Edge **thickness** reflects how active a user is in each subreddit.
-
+  - Node **size** scales logarithmically with score
+  - **Category diamonds** are colour-coded by topic (16 distinct colours)
+  - Subreddit labels show **activity count** at a glance
+  - Edge **thickness** reflects interaction volume
+- **Zero Server Cost** — Everything runs in the browser via JSONP (bypasses CORS naturally). No backend proxy needed!
 
 ---
 
 ## Quick Start
 
-### Installation
+You don't even need a server to run this!
 
-```bash
-# Clone the repo
-git clone https://github.com/<your-username>/reddit-graph.git
-cd reddit-graph
+1. Clone or download this repository.
+2. Double-click `index.html` to open it in your browser.
+3. Enter a Reddit username.
 
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Usage
-
-```bash
-python main.py
-```
-
-You'll be prompted for a Reddit username. The script will:
-
-1. Fetch all available public activity (paginated, rate-limited).
-2. Build an interactive vis.js network graph.
-3. Save `<username>_graph.html` and open it in your default browser.
+If you want to host it online, you can simply drop these files into GitHub Pages, Netlify, Cloudflare Pages, or Vercel. It is 100% static!
 
 ---
 
-##  Project Structure
+## How It Works
+
+```
+  Browser                           Reddit
+  ──────                           ──────
+  1. User enters username
+  2. JS injects <script>   ────→  reddit.com/user/X.json?jsonp=...
+  3. JSONP script loads    ←────  (Bypasses CORS naturally)
+  4. Browser classifies subreddits into categories
+  5. Browser builds vis.js graph
+  6. Interactive visualization rendered
+```
+
+**Architecture:** User → Category → Subreddit → Post/Comment (4-tier hierarchy)
+
+- All scraping and graph logic happens **entirely in the browser** using a clever JSONP trick to bypass Reddit's CORS policy.
+- Reddit traffic comes from users' own browsers — no single IP to throttle!
+
+---
+
+## Project Structure
 
 ```
 reddit-graph/
-├── main.py                    # CLI entry-point
-├── reddit_graph/              # Core package
-│   ├── __init__.py            # Package metadata & version
-│   ├── categories.py          # Subreddit → category classifier (150+ known subs)
-│   ├── config.py              # Colour palette & vis.js physics options
-│   ├── graph.py               # Graph construction & HTML export
-│   ├── scraper.py             # Reddit JSON API fetcher
-│   ├── templates.py           # Injected HTML legend & JS click handler
-│   └── utils.py               # Shared helpers (clamp, truncate, etc.)
-├── requirements.txt           # Python dependencies
+├── index.html               # Main page (landing + graph screens)
+├── css/
+│   └── style.css            # Dark theme, glassmorphism, animations
+├── js/
+│   ├── app.js               # UI controller & screen transitions
+│   ├── scraper.js           # Reddit JSONP fetcher with pagination
+│   ├── categories.js        # Subreddit → category classifier (150+ known)
+│   └── graph.js             # vis.js network builder
 ├── .gitignore
-├── LICENSE                    # MIT
+├── LICENSE
 └── README.md
 ```
 
 ---
 
-##  How It Works
+## Configuration
 
-```
-┌──────────┐     JSON API      ┌───────────┐     pyvis      ┌───────────┐
-│  Reddit   │ ──────────────▶  │  Scraper   │ ────────────▶  │  Graph    │
-│  (public) │   paginated      │  scraper.py│   items list   │  graph.py │
-└──────────┘                   └───────────┘                 └─────┬─────┘
-                                                                   │
-                                                          HTML + legend + JS
-                                                                   │
-                                                                   ▼
-                                                          username_graph.html
-                                                          (open in browser)
-```
-
-1. **Scraper** pages through `/user/{name}.json`, normalises each post (`t3`) and comment (`t1`) into a flat dict.
-2. **Classifier** maps each subreddit to a high-level category (Gaming, Tech, News, etc.) using a 150+ entry lookup table with keyword fallback.
-3. **Graph Builder** creates a pyvis `Network` with four tiers of nodes (**user → category → subreddit → activity**) and colour-coded edges.
-4. **HTML Writer** generates the page, injects the interactive legend and click-to-open handler, and writes UTF-8.
+| File | What to change | Purpose |
+|------|---------------|---------|
+| `js/graph.js` | `COLORS` object | Node colours for each type |
+| `js/graph.js` | `GRAPH_OPTIONS` object | vis.js physics, spacing, interaction |
+| `js/categories.js` | `KNOWN` object | Add subreddit → category mappings |
+| `js/categories.js` | `KEYWORD_RULES` array | Fallback keyword patterns |
+| `js/categories.js` | `CATEGORY_COLORS` object | Colour for each of the 16 categories |
 
 ---
 
-##  Configuration
+## Limitations
 
-All tunables live in [`reddit_graph/config.py`](reddit_graph/config.py):
-
-| File | Constant | Purpose |
-|------|----------|---------|
-| `config.py` | `COLORS` | Hex colour map for each node type |
-| `config.py` | `GRAPH_OPTIONS` | vis.js physics solver, stabilisation, and interaction settings |
-| `categories.py` | `CATEGORY_COLORS` | Colour for each of the 16 topic categories |
-| `categories.py` | `_KNOWN` | Subreddit → category lookup table (extend to add more) |
-| `categories.py` | `_KEYWORD_RULES` | Fallback keyword patterns for unknown subreddits |
-
-To tweak the physics (e.g. make the graph tighter or looser), edit the `forceAtlas2Based` values in `GRAPH_OPTIONS`.
-
-To add new subreddit mappings, add entries to the `_KNOWN` dict in `categories.py`.
+- Reddit's public JSON API returns a **maximum of ~1,000 items** per user (hard Reddit limit)
+- **No authentication** — private/quarantined subreddits and removed content won't appear
+- Heavy users may take 30–60 seconds to fully paginate (1s delay between pages to respect rate limits)
+- **CORS Bypassed:** Uses Reddit's built-in JSONP support so your browser can scrape directly without any API proxies.
 
 ---
 
-##  Limitations
+## License
 
-- Reddit's public JSON API returns a **maximum of ~1 000 items** per user (hard limit on their side).
-- **No authentication** — private/quarantined subreddits and removed content won't appear.
-- Heavy users may take 30-60 seconds to fully paginate due to the 1-second rate-limit delay between pages.
+[MIT](LICENSE)
