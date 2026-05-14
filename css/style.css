@@ -77,18 +77,13 @@ html, body {
 
 .landing-card {
   text-align: center;
-  padding: 48px 44px 40px;
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-lit);
-  border-radius: 20px;
-  box-shadow:
-    0 0 80px rgba(255, 69, 0, 0.06),
-    0 24px 60px rgba(0, 0, 0, 0.5);
-  max-width: 460px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  max-width: 420px;
   width: 90%;
-  animation: cardIn 0.6s ease-out;
+  animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes cardIn {
@@ -107,14 +102,11 @@ html, body {
 }
 
 .landing-card h1 {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-  background: linear-gradient(135deg, #ffffff 0%, #b0b0b4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 40px;
+  color: #ffffff;
 }
 
 .subtitle {
@@ -128,30 +120,31 @@ html, body {
 
 .input-group {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 40px;
+  padding: 6px 6px 6px 20px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.input-group:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .input-wrapper {
   flex: 1;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.input-wrapper:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .input-prefix {
-  color: var(--text-dim);
-  font-weight: 600;
-  font-size: 15px;
-  margin-right: 2px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 16px;
+  margin-right: 4px;
   user-select: none;
 }
 
@@ -160,11 +153,11 @@ html, body {
   background: none;
   border: none;
   outline: none;
-  color: var(--text);
-  font-size: 15px;
+  color: #ffffff;
+  font-size: 16px;
   font-family: var(--font);
-  font-weight: 500;
-  padding: 13px 0;
+  font-weight: 400;
+  padding: 10px 0;
 }
 
 .input-wrapper input::placeholder {
@@ -174,27 +167,26 @@ html, body {
 #submitBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 22px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 700;
-  font-family: var(--font);
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-  white-space: nowrap;
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 #submitBtn:hover {
-  background: #e63e00;
-  box-shadow: 0 4px 20px var(--accent-glow);
+  background: #ff5722;
+  transform: scale(1.05);
 }
 
 #submitBtn:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 #submitBtn:disabled {
@@ -204,11 +196,7 @@ html, body {
 
 .btn-arrow {
   font-size: 18px;
-  transition: transform 0.2s;
-}
-
-#submitBtn:hover .btn-arrow {
-  transform: translateX(3px);
+  font-weight: bold;
 }
 
 /* ── Error ─────────────────────────────────────────────────────────── */
@@ -231,19 +219,7 @@ html, body {
   75%      { transform: translateX(6px); }
 }
 
-/* ── Landing Footer ────────────────────────────────────────────────── */
 
-.landing-footer {
-  position: absolute;
-  bottom: 32px;
-  display: flex;
-  gap: 10px;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.dot { opacity: 0.3; }
 
 /* ── Loading Overlay ───────────────────────────────────────────────── */
 
@@ -442,12 +418,7 @@ html, body {
   }
 
   .input-group {
-    flex-direction: column;
-  }
-
-  #submitBtn {
-    justify-content: center;
-    padding: 13px;
+    padding: 4px 4px 4px 16px;
   }
 
   .stats-bar {
