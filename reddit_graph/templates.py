@@ -29,6 +29,7 @@ LEGEND_HTML = """\
 ">
   <b style="font-size:14px;">Legend</b><br>
   <span style="color:#FF4500; font-size:18px;">&#9733;</span> u/{USERNAME}<br>
+  <span style="color:#7E57C2;">&#9670;</span> Category<br>
   <span style="color:#0079D3;">&#9679;</span> Subreddit<br>
   <span style="color:#46D160;">&#9646;</span> Post<br>
   <span style="color:#FFB000;">&#9711;</span> Comment<br>

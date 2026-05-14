@@ -1,9 +1,12 @@
 """
 Build a pyvis / vis.js interactive network graph from scraped Reddit activity.
+
+Graph hierarchy:  User → Category → Subreddit → Post/Comment
 """
 
 from pyvis.network import Network
 
+from .categories import CATEGORY_COLORS, classify_subreddit
 from .config import COLORS, GRAPH_OPTIONS
 from .templates import CLICK_HANDLER_JS, LEGEND_HTML
 from .utils import clamp, score_to_size, truncate
@@ -17,9 +20,10 @@ def build_graph(items: list[dict], username: str) -> Network:
     Return a fully-populated :class:`~pyvis.network.Network` with:
 
     * a central **user** star node
+    * **category** ring nodes grouping related subreddits
     * one **subreddit** node per unique subreddit
     * one **post** or **comment** node per activity item
-    * edges connecting user → subreddit → item
+    * edges: user → category → subreddit → item
     """
     net = Network(
         height="100vh",
@@ -32,7 +36,16 @@ def build_graph(items: list[dict], username: str) -> Network:
     net.set_options(GRAPH_OPTIONS)
 
     _add_user_node(net, username, len(items))
-    _add_subreddit_nodes(net, items, username)
+
+    # classify every subreddit
+    sub_to_cat: dict[str, str] = {}
+    for item in items:
+        sub = item["subreddit"]
+        if sub not in sub_to_cat:
+            sub_to_cat[sub] = classify_subreddit(sub)
+
+    _add_category_nodes(net, items, sub_to_cat, username)
+    _add_subreddit_nodes(net, items, sub_to_cat)
     _add_activity_nodes(net, items)
 
     return net
@@ -67,22 +80,76 @@ def _add_user_node(net: Network, username: str, total: int) -> None:
     )
 
 
-def _add_subreddit_nodes(net: Network, items: list[dict], username: str) -> None:
+def _add_category_nodes(
+    net: Network,
+    items: list[dict],
+    sub_to_cat: dict[str, str],
+    username: str,
+) -> None:
+    """Add one node per category and connect it to the central user node."""
+    # gather stats per category
+    cat_stats: dict[str, dict] = {}
+    for item in items:
+        cat = sub_to_cat[item["subreddit"]]
+        if cat not in cat_stats:
+            cat_stats[cat] = {"count": 0, "subs": set()}
+        cat_stats[cat]["count"] += 1
+        cat_stats[cat]["subs"].add(item["subreddit"])
+
+    for cat, stats in cat_stats.items():
+        cat_id = f"cat:{cat}"
+        count = stats["count"]
+        num_subs = len(stats["subs"])
+        colour = CATEGORY_COLORS.get(cat, CATEGORY_COLORS["Other"])
+
+        net.add_node(
+            cat_id,
+            label=cat,
+            title=(
+                f"<b>{cat}</b><br>"
+                f"{count} activities across {num_subs} subreddit{'s' if num_subs != 1 else ''}"
+            ),
+            color={
+                "background": colour,
+                "border": colour,
+                "highlight": {"background": colour, "border": "#ffffff"},
+            },
+            size=clamp(20 + count * 2, 20, 60),
+            shape="diamond",
+            font={"size": 14, "color": "#ffffff", "strokeWidth": 3, "strokeColor": "#000000"},
+        )
+        net.add_edge(
+            f"user:{username}",
+            cat_id,
+            width=clamp(1.5 + count * 0.3, 1.5, 8),
+            color={"color": colour + "66", "highlight": colour},
+            title=f"{count} activities",
+        )
+
+
+def _add_subreddit_nodes(
+    net: Network,
+    items: list[dict],
+    sub_to_cat: dict[str, str],
+) -> None:
     sub_items: dict[str, list] = {}
     for item in items:
         sub_items.setdefault(item["subreddit"], []).append(item)
 
     for sub, sub_list in sub_items.items():
         sub_id = f"sub:{sub}"
+        cat_id = f"cat:{sub_to_cat[sub]}"
         count = len(sub_list)
         posts = sum(1 for i in sub_list if i["type"] == "post")
         comments = sum(1 for i in sub_list if i["type"] == "comment")
+        cat_colour = CATEGORY_COLORS.get(sub_to_cat[sub], CATEGORY_COLORS["Other"])
 
         net.add_node(
             sub_id,
             label=f"r/{sub}",
             title=(
                 f"<b>r/{sub}</b><br>"
+                f"Category: {sub_to_cat[sub]}<br>"
                 f"{count} activities<br>"
                 f"{posts} posts, {comments} comments<br>"
                 f"<a href='https://reddit.com/r/{sub}' target='_blank'>open subreddit</a>"
@@ -91,12 +158,15 @@ def _add_subreddit_nodes(net: Network, items: list[dict], username: str) -> None
             size=clamp(15 + count * 3, 15, 55),
             shape="dot",
             url=f"https://reddit.com/r/{sub}",
+            borderWidth=2,
+            borderWidthSelected=3,
         )
+        # edge: category → subreddit
         net.add_edge(
-            f"user:{username}",
+            cat_id,
             sub_id,
             width=clamp(1 + count * 0.4, 1, 8),
-            color={"color": "#555", "highlight": "#aaa"},
+            color={"color": cat_colour + "44", "highlight": cat_colour},
             title=f"{count} interactions",
         )
 
