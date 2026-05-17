@@ -369,6 +369,12 @@ function truncate(text, n = 300) {
   return text.length <= n ? text : text.slice(0, n) + "...";
 }
 
+function htmlTitle(html) {
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  return container;
+}
+
 // ── Graph options ─────────────────────────────────────────────────
 const GRAPH_OPTIONS = {
   physics: {
@@ -424,7 +430,7 @@ function buildGraph(container, items, username) {
   nodes.add({
     id: `user:${username}`,
     label: `u/${username}`,
-    title: `<b>u/${username}</b><br>${items.length} total activities`,
+    title: htmlTitle(`<b>u/${username}</b><br>${items.length} total activities`),
     color: COLORS.user,
     size: 65,
     shape: "star",
@@ -447,7 +453,7 @@ function buildGraph(container, items, username) {
     nodes.add({
       id: `cat:${cat}`,
       label: `${cat.toUpperCase()} (${numSubs})`,
-      title: `<b>${cat}</b><br>${stats.count} activities across ${numSubs} subreddit${numSubs !== 1 ? "s" : ""}`,
+      title: htmlTitle(`<b>${cat}</b><br>${stats.count} activities across ${numSubs} subreddit${numSubs !== 1 ? "s" : ""}`),
       color: { background: colour, border: "#ffffff", highlight: { background: colour, border: "#ffffff" } },
       size: clamp(30 + stats.count * 2, 30, 70),
       shape: "diamond",
@@ -459,7 +465,7 @@ function buildGraph(container, items, username) {
       to: `cat:${cat}`,
       width: clamp(2 + stats.count * 0.4, 2, 10),
       color: { color: colour + "55", highlight: colour },
-      title: `${stats.count} activities`,
+      title: htmlTitle(`${stats.count} activities`),
     });
   }
 
@@ -479,7 +485,7 @@ function buildGraph(container, items, username) {
     nodes.add({
       id: `sub:${sub}`,
       label: `r/${sub} · ${count}`,
-      title: `<b>r/${sub}</b><br>Category: ${cat}<br>${count} activities<br>${posts} posts, ${comments} comments<br><a href="https://reddit.com/r/${sub}" target="_blank">open subreddit</a>`,
+      title: htmlTitle(`<b>r/${sub}</b><br>Category: ${cat}<br>${count} activities<br>${posts} posts, ${comments} comments<br><a href="https://reddit.com/r/${sub}" target="_blank">open subreddit</a>`),
       color: { background: COLORS.subreddit, border: catColour, highlight: { background: "#81D4FA", border: catColour } },
       size: clamp(20 + count * 5, 20, 65),
       shape: "dot",
@@ -493,7 +499,7 @@ function buildGraph(container, items, username) {
       to: `sub:${sub}`,
       width: clamp(1.5 + count * 0.5, 1.5, 7),
       color: { color: catColour + "33", highlight: catColour },
-      title: `${count} interactions`,
+      title: htmlTitle(`${count} interactions`),
     });
   }
 
@@ -537,7 +543,7 @@ function buildGraph(container, items, username) {
     nodes.add({
       id: nodeId,
       label: nodeLabel,
-      title: tooltip,
+      title: htmlTitle(tooltip),
       color: { background: color + "CC", border: color, highlight: { background: "#ffffff", border: color } },
       size: clamp(scoreToSize(item.score) - 2, 6, 40),
       shape: item.type === "post" ? "box" : "dot",
